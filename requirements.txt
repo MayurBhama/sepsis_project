@@ -1,0 +1,16 @@
+# Core Data Handling and Analysis
+pandas
+numpy
+
+# Database Connector (for MongoDB)
+pymongo
+
+# Configuration Management
+pyyaml
+
+# Scikit-learn (Standard ML Library - included as a placeholder for later steps)
+scikit-learn
+
+# Jupyer Notebook Support (if you use notebooks for development)
+jupyter
+ipykernel

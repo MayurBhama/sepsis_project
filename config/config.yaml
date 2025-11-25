@@ -1,0 +1,65 @@
+mongodb:
+  uri: "mongodb://localhost:27017/"
+  database: "sepsis_db"
+  raw_collection: "raw_data"
+
+data_source:
+  csv_path: "data/sepsis_data.csv"
+
+data_validation:
+  max_missing_threshold: 40  # drop columns above 40% missing
+
+  numerical_columns:
+    - Hour
+    - HR
+    - O2Sat
+    - Temp
+    - SBP
+    - MAP
+    - DBP
+    - Resp
+    - BaseExcess
+    - HCO3
+    - FiO2
+    - pH
+    - PaCO2
+    - SaO2
+    - AST
+    - BUN
+    - Alkalinephos
+    - Calcium
+    - Chloride
+    - Creatinine
+    - Glucose
+    - Lactate
+    - Magnesium
+    - Phosphate
+    - Potassium
+    - Bilirubin_total
+    - Hct
+    - Hgb
+    - PTT
+    - WBC
+    - Platelets
+    - Age
+    - HospAdmTime
+    - ICULOS
+    - Gender
+    - Unit1
+    - Unit2
+  categorical_columns: []
+
+  target_column: SepsisLabel
+
+preprocessing:
+  outlier:
+    lower_percentile: 1
+    upper_percentile: 99
+
+  # where to save the cleaned data
+  output_path: "data/processed/clean_sepsis_data.csv"
+
+  feature_engineering:
+    create_shock_index: true
+    create_temp_abnormal: true
+    create_wbc_abnormal: true
