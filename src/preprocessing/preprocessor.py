@@ -9,6 +9,7 @@ from sklearn.preprocessing import LabelEncoder
 from src.logger import logger
 from src.exception import CustomException
 from src.utils import read_yaml
+from pymongo import MongoClient
 
 
 class DataPreprocessor:
@@ -33,7 +34,6 @@ class DataPreprocessor:
             self.lower_pct = self.preproc_cfg["outlier"]["lower_percentile"]
             self.upper_pct = self.preproc_cfg["outlier"]["upper_percentile"]
             self.output_path = self.preproc_cfg["output_path"]
-            self.fe_cfg = self.preproc_cfg["feature_engineering"]
 
             logger.info("DataPreprocessor initialized successfully.")
         except Exception as e:
@@ -149,72 +149,37 @@ class DataPreprocessor:
 
         except Exception as e:
             raise CustomException(e, sys)
-
-    # ------------------------------------------------------------------ #
-    def _feature_engineering(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        - Shock_Index (HR/SBP)
-        - Temp_Abnormal (if Temp exists)
-        - WBC_Abnormal (if WBC exists)
-        """
-        try:
-            logger.info("Applying feature engineering...")
-            fe_done = False
-            df_fe = df.copy()
-
-            # Shock Index
-            if (
-                self.fe_cfg.get("create_shock_index", False)
-                and "HR" in df_fe.columns
-                and "SBP" in df_fe.columns
-            ):
-                df_fe["Shock_Index"] = df_fe["HR"] / (df_fe["SBP"] + 1e-6)
-                logger.info("Created feature: Shock_Index (HR/SBP)")
-                fe_done = True
-
-            # Temp_Abnormal (note: Temp column was dropped in validation, but logic preserved)
-            if (
-                self.fe_cfg.get("create_temp_abnormal", False)
-                and "Temp" in df_fe.columns
-            ):
-                df_fe["Temp_Abnormal"] = (
-                    (df_fe["Temp"] > 38) | (df_fe["Temp"] < 36)
-                ).astype(int)
-                logger.info("Created feature: Temp_Abnormal")
-                fe_done = True
-            else:
-                logger.info("Temp_Abnormal skipped (Temp column not present).")
-
-            # WBC_Abnormal (WBC was dropped due to high missingness, but logic preserved)
-            if (
-                self.fe_cfg.get("create_wbc_abnormal", False)
-                and "WBC" in df_fe.columns
-            ):
-                df_fe["WBC_Abnormal"] = (
-                    (df_fe["WBC"] > 12) | (df_fe["WBC"] < 4)
-                ).astype(int)
-                logger.info("Created feature: WBC_Abnormal")
-                fe_done = True
-            else:
-                logger.info("WBC_Abnormal skipped (WBC column not present).")
-
-            if not fe_done:
-                logger.info("No feature engineering features created (conditions not met).")
-
-            return df_fe
-
-        except Exception as e:
-            raise CustomException(e, sys)
-
     # ------------------------------------------------------------------ #
     def save_preprocessed(self, df: pd.DataFrame) -> None:
-        """Save preprocessed dataframe to CSV."""
+        """
+        Save cleaned data to CSV + MongoDB clean collection
+        """
         try:
+            # Save to CSV
             os.makedirs(os.path.dirname(self.output_path), exist_ok=True)
             df.to_csv(self.output_path, index=False)
-            logger.info(f"Preprocessed data saved to: {self.output_path}")
+            logger.info(f"Preprocessed data saved to CSV: {self.output_path}")
+
+            # Save to MongoDB
+            mongo_cfg = self.config["mongodb"]
+            client = MongoClient(mongo_cfg["uri"])
+            db = client[mongo_cfg["database"]]
+            collection = db[mongo_cfg["clean_collection"]]
+
+            # Remove old data
+            collection.delete_many({})
+
+            # Insert new cleaned data
+            collection.insert_many(df.to_dict("records"))
+
+            logger.info(
+                f"Preprocessed data saved to MongoDB clean collection: "
+                f"{mongo_cfg['database']}.{mongo_cfg['clean_collection']}"
+            )
+
         except Exception as e:
             raise CustomException(e, sys)
+
 
     # ------------------------------------------------------------------ #
     def run_preprocessing(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -226,8 +191,7 @@ class DataPreprocessor:
             df_proc = self._remove_duplicates(df_proc)
             df_proc = self._cap_outliers(df_proc)
             df_proc = self._encode_categoricals(df_proc)
-            df_proc = self._feature_engineering(df_proc)
-
+            
             logger.info(f"Preprocessing completed. Final shape: {df_proc.shape}")
             return df_proc
 

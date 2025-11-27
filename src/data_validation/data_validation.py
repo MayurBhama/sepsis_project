@@ -107,7 +107,6 @@ class DataValidator:
 
             logger.info("All validation checks passed successfully.")
 
-            return df_clean, null_100_cols, high_missing_cols
-
+            return df_clean
         except Exception as e:
             raise CustomException(e, sys)

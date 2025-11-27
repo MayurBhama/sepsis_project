@@ -9,6 +9,10 @@ __pycache__/
 data/*.csv
 data/processed/*.csv
 *.csv
+mlruns/
+mlartifacts/
+logs/
+__pycache__/
 
 # Distribution / packaging
 .Python

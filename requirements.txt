@@ -1,16 +1,17 @@
-# Core Data Handling and Analysis
-pandas
+fastapi
+uvicorn[standard]
+gunicorn
+pydantic
 numpy
-
-# Database Connector (for MongoDB)
-pymongo
-
-# Configuration Management
-pyyaml
-
-# Scikit-learn (Standard ML Library - included as a placeholder for later steps)
+pandas
 scikit-learn
-
-# Jupyer Notebook Support (if you use notebooks for development)
+xgboost
+imbalanced-learn
+mlflow
+optuna
+PyYAML
+pymongo
+python-dotenv
 jupyter
 ipykernel
+

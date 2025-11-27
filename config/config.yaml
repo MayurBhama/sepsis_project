@@ -1,13 +1,31 @@
+# ================================================================================
+# MONGO DB (used only for ingestion/cleaning if needed)
+# ================================================================================
 mongodb:
   uri: "mongodb://localhost:27017/"
   database: "sepsis_db"
   raw_collection: "raw_data"
+  clean_collection: "clean_sepsis_data"
 
+# ================================================================================
+# RAW CSV SOURCE (if ingesting from CSV)
+# ================================================================================
 data_source:
   csv_path: "data/sepsis_data.csv"
 
+# ================================================================================
+# MLFLOW CONFIG
+# ================================================================================
+mlflow:
+  tracking_uri: "mlruns"
+  experiment_name: "sepsis_prediction_experiments"
+  run_name_prefix: "model_run"
+
+# ================================================================================
+# DATA VALIDATION
+# ================================================================================
 data_validation:
-  max_missing_threshold: 40  # drop columns above 40% missing
+  max_missing_threshold: 40
 
   numerical_columns:
     - Hour
@@ -47,19 +65,48 @@ data_validation:
     - Gender
     - Unit1
     - Unit2
+
   categorical_columns: []
 
   target_column: SepsisLabel
 
+# ================================================================================
+# PREPROCESSING CONFIG
+# ================================================================================
 preprocessing:
   outlier:
     lower_percentile: 1
     upper_percentile: 99
 
-  # where to save the cleaned data
+  # final cleaned file before splitting
   output_path: "data/processed/clean_sepsis_data.csv"
 
   feature_engineering:
-    create_shock_index: true
-    create_temp_abnormal: true
-    create_wbc_abnormal: true
+    create_shock_index: false
+    create_temp_abnormal: false
+    create_wbc_abnormal: false
+
+# ================================================================================
+# TRAIN/TEST SPLIT OUTPUT PATHS
+# ================================================================================
+data_split:
+  train_path: "data/processed/train_sepsis.csv"
+  test_path: "data/processed/test_sepsis.csv"
+  test_size: 0.2
+  random_state: 42
+
+# ================================================================================
+# MODEL TRAINING (FINAL VERSION)
+# ================================================================================
+model_training:
+
+  # NEW — required for trainer.py
+  random_state: 42
+
+  smote:
+    enabled: true
+    k_neighbors: 5
+
+  model_dir: "models"
+  best_model_filename: "best_sepsis_model.pkl"
+  metadata_filename: "model_metadata.json"
