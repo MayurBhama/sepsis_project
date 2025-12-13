@@ -46,7 +46,6 @@ This project addresses the critical challenge of **early sepsis detection** in I
 8. [Evaluation Metrics: Why Accuracy is Meaningless Here](#8-evaluation-metrics-why-accuracy-is-meaningless-here)
 9. [Results and Analysis](#9-results-and-analysis)
 10. [Lessons Learned](#10-lessons-learned)
-11. [How to Reproduce](#11-how-to-reproduce)
 
 ---
 
@@ -1045,45 +1044,6 @@ Each of these individually might not seem alarming, but the LSTM combining all t
 | More aggressive feature engineering | +5% AUPRC |
 | Multi-task learning (predict severity too) | Better calibration |
 | External validation (different hospital) | Generalizability proof |
-
----
-
-## 11. How to Reproduce
-
-### 11.1 Setup
-
-```bash
-# Clone and setup
-git clone <repository>
-cd sepsis-prediction
-
-# Create virtual environment
-python -m venv venv
-.\venv\Scripts\activate  # Windows
-source venv/bin/activate  # Linux/Mac
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### 11.2 Run Training
-
-```bash
-# Standard pipeline
-python run_pipeline.py
-
-# Industry-grade with LSTM + Optuna
-python industry_grade_pipeline.py
-
-# Test the model
-python test_model.py
-```
-
-### 11.3 Start API
-
-```bash
-uvicorn app.main:app --reload --port 8000
-```
 
 ---
 
