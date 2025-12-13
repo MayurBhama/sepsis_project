@@ -792,20 +792,6 @@ Hour   HR    What Regular Model Sees    What LSTM Remembers
 LSTM catches the PATTERN, not just the current value.
 ```
 
-**How LSTM Works (Simple Analogy):**
-
-Think of LSTM like a doctor who remembers everything about a patient:
-
-1. **Regular Model** = A doctor with amnesia. Every hour, they forget the previous hour. They only see current vitals.
-
-2. **LSTM** = A doctor with perfect memory. They remember every hour and notice: "This patient's vitals have been slowly worsening for 12 hours. Something is wrong."
-
-**The Attention Mechanism:**
-
-Our LSTM also has "attention" - it learns which hours matter most. 
-
-For sepsis, it learns: "The hours RIGHT BEFORE deterioration are most important. Pay extra attention to hours where vitals suddenly start changing."
-
 ```python
 class SepsisLSTM(nn.Module):
     def __init__(self):
