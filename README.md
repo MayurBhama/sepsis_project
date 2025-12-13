@@ -1033,9 +1033,86 @@ Each of these individually might not seem alarming, but the LSTM combining all t
 | **Early prediction is hard** | Abnormalities may not yet exist 6 hours before |
 | **Imbalance is severe** | 1:55 ratio requires careful handling |
 | **Evaluation is nuanced** | AUPRC > AUROC > Accuracy for medical ML |
-| **Clinical buy-in needed** | Doctors must trust the model |
 
-### 10.3 What Would Improve Results
+### 10.3 Understanding the PhysioNet Utility Score
+
+The PhysioNet 2019 Challenge used a special "Utility Score" to evaluate models. This is important to understand because it shows how medical AI should be evaluated differently from regular ML problems.
+
+**The Problem with Standard Metrics:**
+
+In regular ML, we just count correct vs incorrect predictions. But in medicine:
+- Predicting sepsis early is GOOD (gives time for treatment)
+- Predicting sepsis too late is BAD (patient already deteriorating)
+- Missing sepsis entirely is VERY BAD (patient might die)
+- False alarm on healthy patient is slightly bad (unnecessary worry/tests)
+
+**How the Utility Score Works:**
+
+The utility score assigns different rewards and penalties based on WHEN you make a prediction:
+
+#### For Sepsis Patients (Patient who WILL develop sepsis):
+
+![Utility function for sepsis patients](docs/utility_sepsis_patient.png)
+
+**Explanation of the graph:**
+
+Imagine a patient who develops sepsis at hour 48 (t_sepsis).
+
+- **Red line (U_TP - True Positive utility)**: This shows the reward for correctly predicting sepsis
+  - If you predict WAY too early (before t_early, around hour 36): Low reward, prediction might be random
+  - If you predict in the "sweet spot" (t_optimal to t_sepsis, hours 42-48): MAXIMUM reward! You gave warning with time to treat
+  - If you predict too late (after t_sepsis): Reward drops, patient already has sepsis
+
+- **Blue line (U_FN - False Negative utility)**: This shows the PENALTY for missing sepsis
+  - If you miss sepsis early on: Small penalty (still time to catch it)
+  - If you miss sepsis close to t_sepsis: MAXIMUM penalty (you failed when it mattered most)
+  - After t_late: Penalty decreases (patient already being treated hopefully)
+
+**In Simple Terms:**
+```
+Patient develops sepsis at Hour 48
+
+If you predict at Hour 42:  "GREAT!" +1 reward (6 hours early warning)
+If you predict at Hour 48:  "OK" +0.5 reward (right on time, but no early warning)
+If you predict at Hour 52:  "Late" +0.2 reward (too late, but better than nothing)
+If you MISS entirely:       "VERY BAD" -2 penalty (patient could have been saved!)
+```
+
+#### For Non-Sepsis Patients (Healthy patients):
+
+![Utility function for non-sepsis patients](docs/utility_non_sepsis_patient.png)
+
+**Explanation of the graph:**
+
+For patients who never develop sepsis, the graph is simpler:
+
+- **Gray line (U_TN - True Negative utility)**: Correctly saying "no sepsis" = 0 (neutral, as expected)
+- **Orange line (U_FP - False Positive utility)**: Incorrectly predicting sepsis = small negative penalty
+
+**In Simple Terms:**
+```
+Healthy patient (never gets sepsis)
+
+If you correctly say "no sepsis":     0 (good, as expected)
+If you wrongly say "sepsis alert!":  -0.05 (small penalty for false alarm)
+```
+
+**Why False Alarms Have Small Penalty:**
+
+Notice the false positive penalty is small (-0.05) compared to missing sepsis (-2.0). This is intentional!
+
+In medicine, it's MUCH worse to miss a disease than to have a false alarm:
+- False alarm: Doctor checks patient, finds nothing, moves on (mild inconvenience)
+- Missed sepsis: Patient deteriorates and potentially dies (catastrophic)
+
+**What This Means for Our Model:**
+
+The utility score teaches us:
+1. **Early prediction matters** - Get there before t_sepsis
+2. **Missing sepsis is catastrophic** - The penalty is 40x worse than a false alarm
+3. **Threshold should favor sensitivity** - Better to have some false alarms than miss real cases
+
+### 10.4 What Would Improve Results
 
 | Improvement | Expected Impact |
 |-------------|-----------------|
