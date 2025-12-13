@@ -1,8 +1,0 @@
-streamlit
-pymongo
-requests
-pandas
-numpy
-plotly
-shap
-matplotlib
