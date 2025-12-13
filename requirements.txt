@@ -1,17 +1,40 @@
+# Core Web Framework
 fastapi
 uvicorn[standard]
 gunicorn
 pydantic
+
+# Data Processing
 numpy
 pandas
+
+# Machine Learning - Core
 scikit-learn
 xgboost
+lightgbm
+catboost
 imbalanced-learn
-mlflow
+
+# Hyperparameter Optimization
 optuna
+
+# Experiment Tracking
+mlflow
+
+# Configuration
 PyYAML
-pymongo
 python-dotenv
+
+# Database
+pymongo
+
+# Jupyter
 jupyter
 ipykernel
 
+# Visualization (optional)
+matplotlib
+seaborn
+
+# SHAP for explainability (optional)
+# shap
