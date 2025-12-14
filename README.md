@@ -1110,17 +1110,3 @@ The utility score teaches us:
 
 ---
 
-## Learning Resources
-
-While building this project, I referenced and learned from these sources:
-
-1. Singer M, et al. "The Third International Consensus Definitions for Sepsis and Septic Shock (Sepsis-3)." JAMA. 2016.
-2. PhysioNet Computing in Cardiology Challenge 2019: Early Prediction of Sepsis from Clinical Data
-3. Hochreiter & Schmidhuber. "Long Short-Term Memory." Neural Computation. 1997.
-4. Chen & Guestrin. "XGBoost: A Scalable Tree Boosting System." KDD 2016.
-
----
-
-Built by **Mayur** - A data science enthusiast learning and building in healthcare AI.
-
-*This document is designed to be educational. Every decision is explained with rationale. Use it as a learning resource for medical ML projects.*
